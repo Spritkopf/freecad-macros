@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+
+import FreeCAD
+
+from pivy import coin
+
+# check if  there is a temporary clipping plane from a previous run of the macro
+if hasattr(FreeCAD, 'temporary_sketch_clip_plane'):
+	# clipping plane found, remove from scenegraph and delete the object
+	Gui.ActiveDocument.ActiveView.getSceneGraph().removeChild(FreeCAD.temporary_sketch_clip_plane)
+	del FreeCAD.temporary_sketch_clip_plane
+
+else:
+	# no clipping plane found, create one at the sketch base
+
+	# get placement information of the active sketch
+	mat  = ActiveSketch.getGlobalPlacement()
+	point = mat.Base
+	normal = mat.Rotation.multVec(App.Vector(0,0,1))
+		
+	# create the clippong plane at the sketch position, offset by 0.01 mm to prevent cliiping of the sketch itself
+	FreeCAD.temporary_sketch_clip_plane = coin.SoClipPlane()
+	FreeCAD.temporary_sketch_clip_plane.plane.setValue(coin.SbPlane(coin.SbVec3f(-normal.x, -normal.y, -normal.z),-0.01))
+	Gui.ActiveDocument.ActiveView.getSceneGraph().insertChild(FreeCAD.temporary_sketch_clip_plane,0)
+	
+	FreeCAD.temporary_sketch_clip_plane.on.setValue(True) # activate clipping plane
+
+
+
+
+
