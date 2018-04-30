@@ -17,13 +17,20 @@ else:
 	mat  = ActiveSketch.getGlobalPlacement()
 	point = mat.Base
 	normal = mat.Rotation.multVec(App.Vector(0,0,1))
-		
-	# create the clippong plane at the sketch position, offset by 0.01 mm to prevent cliiping of the sketch itself
+
+	# offset of the clipping plane so the sketch elements (lines, etc) are not cut off
+	sketch_offset = 0.02		
+
+	# create coin3d vectors of the sketch position	
+	coin_normal_vector = coin.SbVec3f(-normal.x, -normal.y, -normal.z)
+	coin_base_point = coin.SbVec3f(point.x+sketch_offset, point.y+sketch_offset, point.z+sketch_offset)
+
+	# create the clipping plane at the sketch position
 	FreeCAD.temporary_sketch_clip_plane = coin.SoClipPlane()
-	FreeCAD.temporary_sketch_clip_plane.plane.setValue(coin.SbPlane(coin.SbVec3f(-normal.x, -normal.y, -normal.z),-0.01))
+	FreeCAD.temporary_sketch_clip_plane.plane.setValue(coin.SbPlane(coin_normal_vector,coin_base_point))
 	Gui.ActiveDocument.ActiveView.getSceneGraph().insertChild(FreeCAD.temporary_sketch_clip_plane,0)
 	
-	FreeCAD.temporary_sketch_clip_plane.on.setValue(True) # activate clipping plane
+	FreeCAD.temporary_sketch_clip_plane.on.setValue(True) # switch clipping plane on
 
 
 
